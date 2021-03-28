@@ -14,13 +14,13 @@
 #define rst 14
 #define dio0 2
 
-#define DHTPIN 27     // Digital pin connected to the DHT sensor
+#define DHTPIN 26     // Digital pin connected to the DHT sensor
 #define DHTTYPE    DHT11     // DHT 11
 DHT dht(DHTPIN, DHTTYPE);
 
 const int bateriaPin = 33;          // medidor de nivel de bateria
 const int fotoresistorPin = 26;          // medidor de nivel de bateria
-const int sueloPin = 32;          // medidor de nivel de bateria
+const int sueloPin = 32;          // medidor de humedad de suelo
 
 
 
@@ -36,7 +36,7 @@ const char* PARAM_INPUT_2 = "state";
 int counter = 0;
 
 unsigned long tiempo=0;
-const int tiempoLectura = 60000;
+const int tiempoLectura = 15000;
 const int tiempoApagado = 500;
 bool estaLeyendo = true;
 
@@ -95,8 +95,7 @@ String readSol() {
     Serial.println("Fallo fotoresistorPin!");
     return "--";
   }
-  else {
-    
+  else {    
     Serial.println(y);
     return String(y);
   }
@@ -165,25 +164,28 @@ void setup() {
 }
 
 void loop() {
-  //Serial.print("Sending packet: ");
-  //Serial.println(counter);
-
-  //Send LoRa packet to receiver
-   counter++;
-
-  millis();
-  if( millis() >  tiempo+tiempoApagado && !estaLeyendo){
+    
+  if( millis() > tiempo+tiempoApagado && !estaLeyendo){
       digitalWrite(relayGPIOs, HIGH);
+      dht.begin();
       tiempo=millis();
       estaLeyendo=true;
+      Serial.println("Encendemos lecturas");
   }
-  if(millis() >  tiempo+tiempoLectura && estaLeyendo){
-     // envioDatosLora();
+  if(millis() > tiempo+tiempoLectura && estaLeyendo){
+     
       digitalWrite(relayGPIOs, LOW);
       tiempo=millis();
-      estaLeyendo=false;      
+      estaLeyendo=false;    
+      Serial.println("Apagamos lecturas");  
   }
+
+  if (estaLeyendo)  {    
+    delay(3000);
     envioDatosLora();
-    delay(10000);
+  }
+  
+    
+    
     
 }
