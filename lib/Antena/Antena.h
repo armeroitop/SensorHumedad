@@ -23,15 +23,7 @@ class Antena
         void envioDatosLora(String mensaje);
 };
 
-Antena::Antena(/* args */)
-{
-    //setup LoRa transceiver module
-    LoRa.setPins(ss, rst, dio0);
-}
 
-Antena::~Antena()
-{
-}
 
 
 #endif // __ANTENA_H__

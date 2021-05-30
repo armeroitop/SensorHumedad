@@ -1,5 +1,14 @@
 #include <Antena.h>
 
+Antena::Antena()
+{
+    //setup LoRa transceiver module
+    LoRa.setPins(ss, rst, dio0);
+}
+
+Antena::~Antena()
+{
+}
 
 void Antena::setup() 
 {
