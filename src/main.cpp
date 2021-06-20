@@ -7,8 +7,14 @@
 
 unsigned long tiempo=0;
 const int tiempoLectura = 30000;
-const int tiempoApagado = 100000;
+
 bool estaLeyendo = true;
+
+int contadorLecturas = 0;
+const int numeroMaximoLecturas = 5;
+const int tiempoEntreLecturas = 10000; //Son 10 segundos en milisencond, 
+unsigned long tiempoUltimaLectura = 0; //Guardamos el tiempo en el que se toma la ultima lectura
+const int tiempoApagado = 120; // En segundos
 
 Estado estado;
 
@@ -23,46 +29,43 @@ void setup() {
     miSensor.setup();
     antenaLora.setup();
 
-    estado = Estado::CalentadoMotores;
+    estado = Estado::Encendido;
  
 }
 
 void loop() {
     
-  if( millis() > tiempo+tiempoApagado && !estaLeyendo){
-      
-      
-      tiempo=millis();
-      estaLeyendo=true;
-      Serial.println("Encendemos lecturas");
-  }
-  if(millis() > tiempo+tiempoLectura && estaLeyendo){
-      LoRa.sleep();
-    
-      tiempo = millis();g
-      estaLeyendo = false;    
-      Serial.println("Apagamos lecturas");  
-  }
-
-  if (estaLeyendo)  {    
-    delay(10000);
-    //envioDatosLora();
-    antenaLora.envioDatosLora(miSensor.lecturasDeTodo());
-  } 
-
   switch (estado)
   {
-    case  Estado::CalentadoMotores:
-      /* code */
+    case  Estado::Encendido:
+        //¿Podemos tomar lecturas? ¿a pasado el tiempo entre lecturas necesario?
+        if (millis()> tiempoUltimaLectura + tiempoEntreLecturas){
+           estado = Estado::TomandoLecturas;
+        }
       break;
 
-    case  Estado::TomandoLectoras :
+    case  Estado::TomandoLecturas:
+        
+        Serial.print("Lectura numero: " );
+        Serial.println(contadorLecturas);
+
         antenaLora.envioDatosLora(miSensor.lecturasDeTodo());
+        contadorLecturas++;
+        tiempoUltimaLectura = millis(); // guardamo el tiempo de esta ultima lectura
+                  
+        if(contadorLecturas >= numeroMaximoLecturas){
+            estado = Estado::Dormido;
+        }else{
+            estado = Estado::Encendido;
+        }
       break;
 
     case  Estado::Dormido :
-      //Ponemos a dormir el esp32, tiempo en microsegundos 10^-6
-      esp_deep_sleep(50000000);
+        contadorLecturas = 0;
+        Serial.println("Vamos a dormir " );
+        
+        esp_deep_sleep(tiempoApagado * 1000000);//Ponemos a dormir el esp32, tiempo en microsegundos 10^-6
+        
       break;
     
     default:
