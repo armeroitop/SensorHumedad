@@ -4,7 +4,10 @@
 
 #include <Arduino.h>
 #include <Adafruit_Sensor.h>
-#include "Adafruit_BME680.h"
+#include <Wire.h>
+#include <SPI.h>
+#include <Adafruit_BME680.h>
+#include <Adafruit_BMP280.h>
 
 #define SEALEVELPRESSURE_HPA (1009.00)
 
@@ -12,7 +15,8 @@
 class Sensores
 {
     private:
-        Adafruit_BME680 bme; // I2C
+        Adafruit_BMP280 bmp280; // I2C
+        Adafruit_BME680 bme680; // I2C
         int _sueloPin;          // medidor de humedad de suelo 27
         int _bateriaPin;          // medidor de nivel de bateria 33
     public:

@@ -25,10 +25,10 @@ Antena antenaLora;
 void setup() {
      
     //initialize Serial Monitor
-    Serial.begin(9600);
-    miSensor.setup();
+    Serial.begin(115200);
+   
     antenaLora.setup();
-
+    miSensor.setup();
     estado = Estado::Encendido;
  
 }
